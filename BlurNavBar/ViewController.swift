@@ -20,30 +20,109 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
 
     private let navigationBarBottomLineView = UIView()
+    private var navigationBlurViewHeightConstraint: NSLayoutConstraint!
 
-    private let statusBarHeight: CGFloat = 20.0
+    private var statusBarHeight: CGFloat {
+        get {
+            let application = UIApplication.sharedApplication()
+            return min(application.statusBarFrame.size.height, application.statusBarFrame.size.width)
+        }
+    }
 
     private var previousYOffset = CGFloat.NaN
+
+    let expansionResistance: CGFloat = 200
+    private var resistanceConsumed: CGFloat = 0.0
+    private var contracting = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         if let navigationBar = navigationController?.navigationBar {
-            let bottomLineOrigin = CGPoint(x: 0, y: navigationBar.frame.height)
-            navigationBarBottomLineView.frame = CGRect(
-                origin: bottomLineOrigin, size: CGSize(width: navigationBar.frame.width, height: 0.4)
-            )
+
             navigationBarBottomLineView.backgroundColor = UIColor.lightGrayColor()
+            navigationBarBottomLineView.translatesAutoresizingMaskIntoConstraints = false
+            navigationBar.addSubview(navigationBarBottomLineView)
+
+            NSLayoutConstraint(
+                item: navigationBarBottomLineView,
+                attribute: .Height,
+                relatedBy: .Equal,
+                toItem: nil,
+                attribute: .Height,
+                multiplier: 1,
+                constant: 0.4).active = true
+
+            NSLayoutConstraint(
+                item: navigationBarBottomLineView,
+                attribute: .Leading,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Leading,
+                multiplier: 1,
+                constant: 0).active = true
+
+            NSLayoutConstraint(
+                item: navigationBarBottomLineView,
+                attribute: .Trailing,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Trailing,
+                multiplier: 1,
+                constant: 0).active = true
+
+            NSLayoutConstraint(
+                item: navigationBarBottomLineView,
+                attribute: .Bottom,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Bottom,
+                multiplier: 1,
+                constant: 0).active = true
 
             let effect = UIBlurEffect(style: .Light)
             let effectView = UIVisualEffectView(effect: effect)
-            effectView.frame = CGRect(
-                x: 0, y: -statusBarHeight,
-                width: navigationBar.frame.width, height: statusBarHeight + navigationBar.frame.height
-            )
+            effectView.translatesAutoresizingMaskIntoConstraints = false
             navigationBar.setBackgroundImage(UIImage(), forBarMetrics: .Default)
             navigationBar.shadowImage = UIImage()
             navigationBar.insertSubview(effectView, atIndex: 1)
+
+            navigationBlurViewHeightConstraint = NSLayoutConstraint(
+                item: effectView,
+                attribute: .Top,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Top,
+                multiplier: 1,
+                constant: -statusBarHeight)
+            navigationBlurViewHeightConstraint.active = true
+
+            NSLayoutConstraint(
+                item: effectView,
+                attribute: .Leading,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Leading,
+                multiplier: 1,
+                constant: 0).active = true
+
+            NSLayoutConstraint(
+                item: effectView,
+                attribute: .Trailing,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Trailing,
+                multiplier: 1,
+                constant: 0).active = true
+
+            NSLayoutConstraint(
+                item: effectView,
+                attribute: .Bottom,
+                relatedBy: .Equal,
+                toItem: navigationBar,
+                attribute: .Bottom,
+                multiplier: 1,
+                constant: 0).active = true
 
             NSNotificationCenter.defaultCenter().addObserver(
                 self,
@@ -60,12 +139,17 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         updateNavigationBarItemsVisiblity()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        navigationBlurViewHeightConstraint.constant = -statusBarHeight
+    }
+
     // MARK: - Layouting views
 
     private func updateNavigationBarItemsVisiblity() {
-        guard let barOriginY = navigationController?.navigationBar.frame.origin.y,
-            navigationBar = navigationController?.navigationBar else {
-                return
+        guard let barOriginY = navigationController?.navigationBar.frame.origin.y else {
+            return
         }
 
         titleItem.title = barOriginY < 0 ? "" : originalTitleItemTitle
@@ -76,11 +160,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             item.tintColor = barOriginY < 0 ? UIColor.clearColor() : originalTitleItemTintColor
         }
 
-        if barOriginY == statusBarHeight {
-            navigationBar.addSubview(navigationBarBottomLineView)
-        } else {
-            navigationBarBottomLineView.removeFromSuperview()
-        }
+        navigationBarBottomLineView.hidden = barOriginY != statusBarHeight
     }
 
     // MARK: - UITableViewDataSource
@@ -123,8 +203,21 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             deltaY = max(0, deltaY - (previousYOffset - end))
         }
 
+        let previousContractingState = contracting
+        contracting = deltaY < 0
+        if contracting != previousContractingState {
+            resistanceConsumed = 0
+        }
+
+         if !contracting && scrollView.contentOffset.y > 0 {
+            let availableResistance = expansionResistance - resistanceConsumed
+            resistanceConsumed = min(expansionResistance, resistanceConsumed + deltaY)
+            deltaY = max(0, deltaY - availableResistance)
+        }
+
         var newOriginY = navigationBar.frame.origin.y + deltaY
-        newOriginY = max(min(newOriginY, statusBarHeight), -statusBarHeight)
+        let maxOriginY = statusBarHeight == 0 ? -navigationBar.frame.height : -statusBarHeight
+        newOriginY = max(min(newOriginY, statusBarHeight), maxOriginY)
 
         let newOrigin = CGPoint(x: 0, y: newOriginY)
         navigationBar.frame = CGRect(origin: newOrigin, size: navigationBar.frame.size)
