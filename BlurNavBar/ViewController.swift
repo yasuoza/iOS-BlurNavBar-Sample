@@ -120,13 +120,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
         let end = floor(scrollView.contentSize.height - CGRectGetHeight(scrollView.bounds) + scrollView.contentInset.bottom - 0.5)
         if previousYOffset > end && deltaY > 0 {
-            deltaY = max(0, deltaY - self.previousYOffset + end);
-        }
-
-        if deltaY < 0 {
-            deltaY = min(0, deltaY);
-        } else if scrollView.contentOffset.y > 0 {
-            deltaY = max(0, deltaY)
+            deltaY = max(0, deltaY - (previousYOffset - end))
         }
 
         var newOriginY = navigationBar.frame.origin.y + deltaY
