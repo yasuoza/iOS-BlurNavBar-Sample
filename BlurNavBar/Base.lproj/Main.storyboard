@@ -10,7 +10,7 @@
         <scene sceneID="T52-Fx-Bis">
             <objects>
                 <navigationController id="Q7b-yJ-Fok" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" hidden="YES" contentMode="scaleToFill" id="6SW-dJ-zid">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="6SW-dJ-zid">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
@@ -22,7 +22,7 @@
             </objects>
             <point key="canvasLocation" x="-671" y="490"/>
         </scene>
-        <!--Landing View Controller-->
+        <!--Master View-->
         <scene sceneID="AUd-nb-DCh">
             <objects>
                 <viewController id="WUD-MU-fAc" customClass="LandingViewController" customModule="BlurNavBar" customModuleProvider="target" sceneMemberID="viewController">
@@ -40,12 +40,13 @@
                                     <constraint firstAttribute="height" constant="64" id="aVl-EI-TAW"/>
                                 </constraints>
                                 <items>
-                                    <navigationItem title="Landing" id="uMO-ux-tjY"/>
+                                    <navigationItem title="Master View" id="uMO-ux-tjY"/>
                                 </items>
                             </navigationBar>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hEq-fj-4oO">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                                <state key="normal" title="Button"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <state key="normal" title="Tap me"/>
                                 <connections>
                                     <segue destination="BYZ-38-t0r" kind="show" id="zdw-TJ-IOJ"/>
                                 </connections>
@@ -62,16 +63,16 @@
                             <constraint firstItem="5NJ-iN-Fid" firstAttribute="leading" secondItem="IiS-C2-5bH" secondAttribute="leading" id="vFY-jh-475"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="v9G-Lh-cJY"/>
+                    <navigationItem key="navigationItem" title="Master View" id="v9G-Lh-cJY"/>
                     <connections>
-                        <outlet property="navigationBar" destination="5NJ-iN-Fid" id="3jy-0C-1Jh"/>
+                        <outlet property="fakeNavigationBar" destination="5NJ-iN-Fid" id="Ty4-3h-Vao"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dJ5-QE-hu3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-671" y="1319"/>
         </scene>
-        <!--View Controller-->
+        <!--Content View-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="BlurNavBar" customModuleProvider="target" sceneMemberID="viewController">
@@ -91,7 +92,7 @@
                                         <rect key="frame" x="0.0" y="92" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="e8U-Iu-34y" id="e1o-RS-7DY">
-                                            <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -108,29 +109,15 @@
                                 </constraints>
                                 <blurEffect style="light"/>
                             </visualEffectView>
-                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TLt-G4-7br">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="64"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="64" id="0o5-8S-IIg"/>
-                                </constraints>
-                                <items>
-                                    <navigationItem title="Title" id="2Zn-nI-jTp">
-                                        <barButtonItem key="leftBarButtonItem" image="arrow-back" id="8hb-ca-NUi"/>
-                                    </navigationItem>
-                                </items>
-                            </navigationBar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="mgj-SW-w9m" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="2Tn-e4-de5"/>
-                            <constraint firstAttribute="trailing" secondItem="TLt-G4-7br" secondAttribute="trailing" id="5Ri-xw-NPh"/>
-                            <constraint firstItem="TLt-G4-7br" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="9hO-tB-UbK"/>
                             <constraint firstItem="x8p-f0-GZt" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="B8Q-au-3Vh"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="x8p-f0-GZt" secondAttribute="bottom" id="DSn-R0-pkl"/>
                             <constraint firstItem="x8p-f0-GZt" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="Z7e-Zj-Kya"/>
                             <constraint firstAttribute="trailing" secondItem="mgj-SW-w9m" secondAttribute="trailing" id="eWF-Ms-qMm"/>
                             <constraint firstItem="mgj-SW-w9m" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="lTG-2Z-jDt"/>
-                            <constraint firstItem="TLt-G4-7br" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="rgj-zf-ORp"/>
                             <constraint firstItem="x8p-f0-GZt" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="uaP-Ac-3QF"/>
                             <constraint firstAttribute="trailing" secondItem="x8p-f0-GZt" secondAttribute="trailing" id="wF5-28-xDX"/>
                         </constraints>
@@ -140,8 +127,8 @@
                             </mask>
                         </variation>
                     </view>
+                    <navigationItem key="navigationItem" title="Content View" id="EDs-TJ-Egy"/>
                     <connections>
-                        <outlet property="navigationBar" destination="TLt-G4-7br" id="Q6W-jN-G0N"/>
                         <outlet property="tableView" destination="x8p-f0-GZt" id="Tdm-9K-cCR"/>
                     </connections>
                 </viewController>
@@ -150,7 +137,4 @@
             <point key="canvasLocation" x="55" y="490"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="arrow-back" width="64" height="64"/>
-    </resources>
 </document>
