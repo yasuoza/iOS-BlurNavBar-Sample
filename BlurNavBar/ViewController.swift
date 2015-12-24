@@ -1,6 +1,8 @@
 import UIKit
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate {
+
+    @IBOutlet weak var navigationBar: UINavigationBar?
 
     @IBOutlet weak var tableView: UITableView! {
         didSet {
@@ -9,18 +11,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
     }
 
-    private var originalTitleItemTitle: String?
-    private var originalTitleItemTintColor: UIColor?
-
-    @IBOutlet weak var titleItem: UINavigationItem! {
-        didSet {
-            originalTitleItemTitle = titleItem.title
-            originalTitleItemTintColor = titleItem.leftBarButtonItems?.first?.tintColor
-        }
-    }
+    private var originalNavBarTitle: String?
 
     private let navigationBarBottomLineView = UIView()
-    private var navigationBlurViewHeightConstraint: NSLayoutConstraint!
 
     private var statusBarHeight: CGFloat {
         get {
@@ -29,6 +22,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
     }
 
+    private var currentNavbarOriginY = CGFloat.NaN
     private var previousYOffset = CGFloat.NaN
 
     let expansionResistance: CGFloat = 200
@@ -38,7 +32,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let navigationBar = navigationController?.navigationBar {
+        if let navigationBar = navigationBar {
+            navigationController?.interactivePopGestureRecognizer?.delegate = self
+
+            let topInset = navigationBar.frame.size.height - statusBarHeight
+            tableView.contentInset = UIEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
+
+            currentNavbarOriginY = navigationBar.frame.origin.y
+            originalNavBarTitle = navigationBar.topItem?.title
+            navigationBar.tintColor = view.window?.tintColor
 
             navigationBarBottomLineView.backgroundColor = UIColor.lightGrayColor()
             navigationBarBottomLineView.translatesAutoresizingMaskIntoConstraints = false
@@ -85,17 +87,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             effectView.translatesAutoresizingMaskIntoConstraints = false
             navigationBar.setBackgroundImage(UIImage(), forBarMetrics: .Default)
             navigationBar.shadowImage = UIImage()
-            navigationBar.insertSubview(effectView, atIndex: 1)
+            navigationBar.insertSubview(effectView, atIndex: 0)
 
-            navigationBlurViewHeightConstraint = NSLayoutConstraint(
+            NSLayoutConstraint(
                 item: effectView,
                 attribute: .Top,
                 relatedBy: .Equal,
                 toItem: navigationBar,
                 attribute: .Top,
                 multiplier: 1,
-                constant: -statusBarHeight)
-            navigationBlurViewHeightConstraint.active = true
+                constant: -20).active = true
 
             NSLayoutConstraint(
                 item: effectView,
@@ -139,28 +140,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         updateNavigationBarItemsVisiblity()
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        navigationBlurViewHeightConstraint.constant = -statusBarHeight
-    }
-
     // MARK: - Layouting views
 
     private func updateNavigationBarItemsVisiblity() {
-        guard let barOriginY = navigationController?.navigationBar.frame.origin.y else {
-            return
-        }
+        let barCollapsed = currentNavbarOriginY < 0
 
-        titleItem.title = barOriginY < 0 ? "" : originalTitleItemTitle
-        titleItem.leftBarButtonItems?.forEach { item in
-            item.tintColor = barOriginY < 0 ? UIColor.clearColor() : originalTitleItemTintColor
-        }
-        titleItem.rightBarButtonItems?.forEach { item in
-            item.tintColor = barOriginY < 0 ? UIColor.clearColor() : originalTitleItemTintColor
-        }
-
-        navigationBarBottomLineView.hidden = barOriginY != statusBarHeight
+        navigationBar?.topItem?.title = barCollapsed ? "" : originalNavBarTitle
+        navigationBar?.tintColor = barCollapsed ? UIColor.clearColor() : view.window?.tintColor
+        navigationBarBottomLineView.hidden = currentNavbarOriginY != 0
+        navigationBar?.hidden = barCollapsed
     }
 
     // MARK: - UITableViewDataSource
@@ -184,7 +172,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
     func scrollViewDidScroll(scrollView: UIScrollView) {
         guard isViewLoaded() && view.window != nil else { return }
-        guard let navigationBar = navigationController?.navigationBar else { return }
+        guard let navigationBar = navigationBar else { return }
 
         if previousYOffset.isNaN {
             previousYOffset = scrollView.contentOffset.y
@@ -215,16 +203,23 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             deltaY = max(0, deltaY - availableResistance)
         }
 
-        var newOriginY = navigationBar.frame.origin.y + deltaY
-        let maxOriginY = statusBarHeight == 0 ? -navigationBar.frame.height : -statusBarHeight
-        newOriginY = max(min(newOriginY, statusBarHeight), maxOriginY)
+        var newOriginY = currentNavbarOriginY + deltaY
+        let maxTopOriginY = -navigationBar.frame.height
+        newOriginY = max(min(newOriginY, 0), maxTopOriginY)
 
         let newOrigin = CGPoint(x: 0, y: newOriginY)
+        currentNavbarOriginY = newOriginY
         navigationBar.frame = CGRect(origin: newOrigin, size: navigationBar.frame.size)
 
         updateNavigationBarItemsVisiblity()
 
         previousYOffset = scrollView.contentOffset.y
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return navigationController?.viewControllers.count > 1
     }
 
 }
