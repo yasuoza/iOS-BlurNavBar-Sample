@@ -124,7 +124,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             resistanceConsumed = 0
         }
 
-         if !contracting && scrollView.contentOffset.y > 0 {
+        if deltaY > 0 && deltaY < 5 {
+            resistanceConsumed = 0
+        }
+
+        if !contracting && scrollView.contentOffset.y > 0 {
             let availableResistance = expansionResistance - resistanceConsumed
             resistanceConsumed = min(expansionResistance, resistanceConsumed + deltaY)
             deltaY = max(0, deltaY - availableResistance)
